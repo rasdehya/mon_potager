@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Accueil{% endblock %}
+{% block content %}
+<div class="p-5 mb-4 bg-success bg-gradient text-white rounded-4 shadow-sm">
+    <h1 class="display-5 fw-bold"><i class="bi bi-flower2 me-2"></i>Mon Potager</h1>
+    <p class="fs-5">Votre guide de culture complet pour tous les légumes du potager. Calendriers, variétés, maladies et conseils adaptés à chaque espèce.</p>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100 text-center">
+            <div class="card-body py-4">
+                <div class="display-6 text-success mb-2"><i class="bi bi-journal-text"></i></div>
+                <h5>Mon Potager</h5>
+                <p class="text-muted small">Planifiez vos cultures sur l'année</p>
+                <a href="/potager" class="btn btn-outline-success">Ouvrir <i class="bi bi-arrow-right ms-1"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100 text-center">
+            <div class="card-body py-4">
+                <div class="display-6 text-success mb-2"><i class="bi bi-diagram-3"></i></div>
+                <h5>Familles</h5>
+                <p class="text-muted small">{{ familles|length }} familles botaniques</p>
+                <a href="/familles" class="btn btn-outline-success">Explorer <i class="bi bi-arrow-right ms-1"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100 text-center">
+            <div class="card-body py-4">
+                <div class="display-6 text-success mb-2"><i class="bi bi-egg-fried"></i></div>
+                <h5>Légumes</h5>
+                <p class="text-muted small">{{ total_legumes }} espèces référencées</p>
+                <a href="/legumes" class="btn btn-outline-success">Voir tout <i class="bi bi-arrow-right ms-1"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100 text-center">
+            <div class="card-body py-4">
+                <div class="display-6 text-success mb-2"><i class="bi bi-tree"></i></div>
+                <h5>Variétés</h5>
+                <p class="text-muted small">{{ total_varietes }} variétés détaillées</p>
+                <a href="/legumes" class="btn btn-outline-success">Découvrir <i class="bi bi-arrow-right ms-1"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if potagers %}
+<h2 class="mb-3"><i class="bi bi-journal-text text-success me-2"></i>Mes potagers</h2>
+<div class="row g-3 mb-5">
+    {% for p in potagers %}
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm {% if p.active %}border-success{% endif %}">
+            <div class="card-body">
+                <h5>{{ p.nom }}</h5>
+                <p class="text-muted small mb-2">{{ p.annee }} · {{ p.items|length }} culture{% if p.items|length > 1 %}s{% endif %}</p>
+                <a href="/potager/{{ p.id }}" class="btn btn-sm btn-outline-success">Voir <i class="bi bi-arrow-right ms-1"></i></a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<h2 class="mb-3"><i class="bi bi-diagram-3 text-success me-2"></i>Familles de légumes</h2>
+<div class="row g-3">
+    {% for famille in familles %}
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="text-success">{{ famille.nom }}</h5>
+                <p class="text-muted small">{{ famille.description[:120] }}{% if famille.description|length > 120 %}...{% endif %}</p>
+                <span class="badge bg-success-subtle text-success-emphasis">{{ famille.legumes|length }} légume{% if famille.legumes|length > 1 %}s{% endif %}</span>
+                <a href="/legumes?famille_id={{ famille.id }}" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

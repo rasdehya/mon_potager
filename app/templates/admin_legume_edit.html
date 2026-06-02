@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}Admin - {{ legume.nom }}{% endblock %}
+{% block content %}
+<style>.edit-section { border:1px solid #dee2e6; border-radius:8px; padding:16px; margin-bottom:16px; }</style>
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/admin" class="text-success">Admin</a></li>
+        <li class="breadcrumb-item"><a href="/admin/legumes" class="text-success">Légumes</a></li>
+        <li class="breadcrumb-item active">{{ legume.nom }}</li>
+    </ol>
+</nav>
+
+<h3 class="mb-3"><i class="bi bi-egg-fried text-success me-2"></i>{{ legume.nom }}</h3>
+
+<form method="post" action="/admin/legumes/{{ legume.id }}/editer">
+<div class="edit-section">
+    <h5 class="mb-3"><i class="bi bi-info-circle text-success me-2"></i>Informations générales</h5>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label small fw-semibold">Nom</label>
+            <input type="text" class="form-control form-control-sm" name="nom" value="{{ legume.nom }}" required>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label small fw-semibold">Nom scientifique</label>
+            <input type="text" class="form-control form-control-sm" name="nom_scientifique" value="{{ legume.nom_scientifique }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label small fw-semibold">Famille</label>
+            <select class="form-select form-select-sm" name="famille_id">
+                {% for f in familles %}<option value="{{ f.id }}" {% if f.id == legume.famille_id %}selected{% endif %}>{{ f.nom }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label small fw-semibold">Exposition</label>
+            <input type="text" class="form-control form-control-sm" name="exposition" value="{{ legume.exposition }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label small fw-semibold">Arrosage</label>
+            <input type="text" class="form-control form-control-sm" name="arrosage" value="{{ legume.arrosage }}">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label small fw-semibold">Sol</label>
+            <input type="text" class="form-control form-control-sm" name="sol" value="{{ legume.sol }}">
+        </div>
+        <div class="col-12">
+            <label class="form-label small fw-semibold">Description</label>
+            <textarea class="form-control form-control-sm" name="description" rows="3">{{ legume.description }}</textarea>
+        </div>
+        <div class="col-12">
+            <label class="form-label small fw-semibold">Conseils de culture</label>
+            <textarea class="form-control form-control-sm" name="conseils_culture" rows="4">{{ legume.conseils_culture }}</textarea>
+        </div>
+    </div>
+</div>
+<button type="submit" class="btn btn-success btn-sm mb-4"><i class="bi bi-check-lg me-1"></i>Enregistrer les modifications</button>
+</form>
+
+<div class="edit-section">
+    <h5 class="mb-3"><i class="bi bi-tree text-success me-2"></i>Variétés <small class="text-muted">({{ varietes|length }})</small></h5>
+    <div class="table-responsive mb-3">
+        <table class="table table-sm mb-0" style="font-size:0.8rem">
+            <thead><tr><th>Nom</th><th>Description</th><th>Particularités</th><th style="width:60px"></th></tr></thead>
+            <tbody>
+                {% for v in varietes %}
+                <tr>
+                    <form method="post" action="/admin/varietes/{{ v.id }}/editer">
+                    <td><input type="text" class="form-control form-control-sm" name="nom" value="{{ v.nom }}" required></td>
+                    <td><input type="text" class="form-control form-control-sm" name="description" value="{{ v.description }}"></td>
+                    <td><input type="text" class="form-control form-control-sm" name="particularites" value="{{ v.particularites }}"></td>
+                    <td class="text-nowrap">
+                        <button type="submit" class="btn btn-sm btn-outline-success py-0 px-1"><i class="bi bi-check"></i></button>
+                        <a href="/admin/varietes/{{ v.id }}/supprimer" class="btn btn-sm btn-outline-danger py-0 px-1" onclick="return confirm('Supprimer {{ v.nom }} ?')"><i class="bi bi-x"></i></a>
+                    </td>
+                    </form>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <form method="post" action="/admin/legumes/{{ legume.id }}/varietes/ajouter" class="row g-2">
+        <div class="col-md-4"><input type="text" class="form-control form-control-sm" name="nom" placeholder="Nom de la variété" required></div>
+        <div class="col-md-4"><input type="text" class="form-control form-control-sm" name="description" placeholder="Description"></div>
+        <div class="col-md-3"><input type="text" class="form-control form-control-sm" name="particularites" placeholder="Particularités"></div>
+        <div class="col-md-1"><button type="submit" class="btn btn-sm btn-success w-100"><i class="bi bi-plus"></i></button></div>
+    </form>
+</div>
+
+<div class="edit-section">
+    <h5 class="mb-3"><i class="bi bi-calendar3 text-success me-2"></i>Calendrier</h5>
+    <div class="table-responsive mb-3">
+        <table class="table table-sm mb-0" style="font-size:0.8rem">
+            <thead><tr><th>Type</th><th>Mois début</th><th>S.</th><th>Mois fin</th><th>S.</th><th>Détails</th><th style="width:40px"></th></tr></thead>
+            <tbody>
+                {% for c in calendrier %}
+                <tr>
+                    <form method="post" action="/admin/calendrier/{{ c.id }}/editer">
+                    <td>
+                        <select class="form-select form-select-sm" name="type">
+                            {% for k,lbl in TYPE_LABELS.items() %}
+                            <option value="{{ k }}" {% if k == c.type %}selected{% endif %}>{{ lbl }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td><input type="number" class="form-control form-control-sm" name="mois_debut" value="{{ c.mois_debut }}" style="width:50px" min="1" max="12"></td>
+                    <td><input type="number" class="form-control form-control-sm" name="semaine_debut" value="{{ c.semaine_debut }}" style="width:40px" min="1" max="4"></td>
+                    <td><input type="number" class="form-control form-control-sm" name="mois_fin" value="{{ c.mois_fin }}" style="width:50px" min="1" max="12"></td>
+                    <td><input type="number" class="form-control form-control-sm" name="semaine_fin" value="{{ c.semaine_fin }}" style="width:40px" min="1" max="4"></td>
+                    <td><input type="text" class="form-control form-control-sm" name="details" value="{{ c.details }}"></td>
+                    <td class="text-nowrap">
+                        <button type="submit" class="btn btn-sm btn-outline-success py-0 px-1"><i class="bi bi-check"></i></button>
+                        <a href="/admin/calendrier/{{ c.id }}/supprimer" class="btn btn-sm btn-outline-danger py-0 px-1" onclick="return confirm('Supprimer ?')"><i class="bi bi-x"></i></a>
+                    </td>
+                    </form>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <form method="post" action="/admin/legumes/{{ legume.id }}/calendrier/ajouter" class="row g-2">
+        <div class="col-md-2">
+            <select class="form-select form-select-sm" name="type">
+                {% for k,lbl in TYPE_LABELS.items() %}<option value="{{ k }}">{{ lbl }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-md-1"><input type="number" class="form-control form-control-sm" name="mois_debut" placeholder="Mois" min="1" max="12" required></div>
+        <div class="col-md-1"><input type="number" class="form-control form-control-sm" name="semaine_debut" value="1" min="1" max="4" style="width:45px"></div>
+        <div class="col-md-1"><input type="number" class="form-control form-control-sm" name="mois_fin" placeholder="Mois" min="1" max="12" required></div>
+        <div class="col-md-1"><input type="number" class="form-control form-control-sm" name="semaine_fin" value="4" min="1" max="4" style="width:45px"></div>
+        <div class="col-md-4"><input type="text" class="form-control form-control-sm" name="details" placeholder="Détails"></div>
+        <div class="col-md-1"><button type="submit" class="btn btn-sm btn-success w-100"><i class="bi bi-plus"></i></button></div>
+    </form>
+</div>
+
+<div class="edit-section">
+    <h5 class="mb-3"><i class="bi bi-bug text-success me-2"></i>Maladies &amp; Ravageurs <small class="text-muted">({{ maladies|length }})</small></h5>
+    <div class="table-responsive mb-3">
+        <table class="table table-sm mb-0" style="font-size:0.8rem">
+            <thead><tr><th>Type</th><th>Nom</th><th>Symptômes</th><th>Traitement</th><th>Prévention</th><th style="width:40px"></th></tr></thead>
+            <tbody>
+                {% for m in maladies %}
+                <tr>
+                    <form method="post" action="/admin/maladies/{{ m.id }}/editer">
+                    <td>
+                        <select class="form-select form-select-sm" name="type">
+                            <option value="maladie" {% if m.type == 'maladie' %}selected{% endif %}>Maladie</option>
+                            <option value="ravageur" {% if m.type == 'ravageur' %}selected{% endif %}>Ravageur</option>
+                        </select>
+                    </td>
+                    <td><input type="text" class="form-control form-control-sm" name="nom" value="{{ m.nom }}"></td>
+                    <td><input type="text" class="form-control form-control-sm" name="symptomes" value="{{ m.symptomes }}"></td>
+                    <td><input type="text" class="form-control form-control-sm" name="traitement" value="{{ m.traitement }}"></td>
+                    <td><input type="text" class="form-control form-control-sm" name="prevention" value="{{ m.prevention }}"></td>
+                    <td class="text-nowrap">
+                        <button type="submit" class="btn btn-sm btn-outline-success py-0 px-1"><i class="bi bi-check"></i></button>
+                        <a href="/admin/maladies/{{ m.id }}/supprimer" class="btn btn-sm btn-outline-danger py-0 px-1" onclick="return confirm('Supprimer {{ m.nom }} ?')"><i class="bi bi-x"></i></a>
+                    </td>
+                    </form>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <form method="post" action="/admin/legumes/{{ legume.id }}/maladies/ajouter" class="row g-2">
+        <div class="col-md-1">
+            <select class="form-select form-select-sm" name="type">
+                <option value="maladie">Maladie</option><option value="ravageur">Ravageur</option>
+            </select>
+        </div>
+        <div class="col-md-2"><input type="text" class="form-control form-control-sm" name="nom" placeholder="Nom" required></div>
+        <div class="col-md-3"><input type="text" class="form-control form-control-sm" name="symptomes" placeholder="Symptômes"></div>
+        <div class="col-md-3"><input type="text" class="form-control form-control-sm" name="traitement" placeholder="Traitement"></div>
+        <div class="col-md-2"><input type="text" class="form-control form-control-sm" name="prevention" placeholder="Prévention"></div>
+        <div class="col-md-1"><button type="submit" class="btn btn-sm btn-success w-100"><i class="bi bi-plus"></i></button></div>
+    </form>
+</div>
+{% endblock %}

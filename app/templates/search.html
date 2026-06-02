@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Recherche{% endblock %}
+{% block content %}
+<h1 class="mb-4"><i class="bi bi-search text-success me-2"></i>Recherche</h1>
+
+<form class="row g-2 mb-4" method="get" action="/recherche">
+    <div class="col-md-8 col-lg-6">
+        <div class="input-group input-group-lg">
+            <input type="search" class="form-control" name="q" value="{{ q }}" placeholder="Rechercher un légume, une variété..." autofocus>
+            <button class="btn btn-success" type="submit"><i class="bi bi-search me-1"></i>Chercher</button>
+        </div>
+    </div>
+</form>
+
+{% if q %}
+    <p class="text-muted">Résultats pour <strong>"{{ q }}"</strong></p>
+
+    {% if results %}
+        <h5 class="mb-3"><i class="bi bi-egg-fried me-2"></i>Légumes ({{ results|length }})</h5>
+        <div class="row g-3 mb-4">
+            {% for legume in results %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-success">{{ legume.nom }}</h5>
+                        <p class="card-text text-muted small">{{ legume.famille.nom }} · {{ legume.varietes|length }} variétés</p>
+                        <p class="card-text small">{{ legume.description[:150] }}...</p>
+                        <a href="/legume/{{ legume.id }}" class="btn btn-outline-success btn-sm">Voir la fiche</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if var_results %}
+        <h5 class="mb-3"><i class="bi bi-tree me-2"></i>Variétés ({{ var_results|length }})</h5>
+        <div class="list-group mb-4">
+            {% for v in var_results %}
+            <a href="/legume/{{ v.legume_id }}" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1 text-success">{{ v.nom }}</h6>
+                    <small class="text-muted">{{ v.legume.nom }}</small>
+                </div>
+                <small class="text-muted">{{ v.description[:120] }}</small>
+            </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if not results and not var_results %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>Aucun résultat pour <strong>"{{ q }}"</strong>.
+        </div>
+    {% endif %}
+{% endif %}
+{% endblock %}

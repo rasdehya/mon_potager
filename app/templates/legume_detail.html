@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}{{ legume.nom }}{% endblock %}
+{% block page_context %}{{ legume.nom }} - {{ legume.famille.nom }} - {{ legume.description[:200] }}{% endblock %}
+{% block content %}
+<style>
+.cal-track { position: relative; height: 22px; margin-bottom: 2px; }
+.cal-bar { position: absolute; height: 18px; border-radius: 3px; top: 2px; cursor: help; min-width: 4px; opacity: 0.85; }
+.cal-bar:hover { opacity: 1; box-shadow: 0 0 4px rgba(0,0,0,0.3); }
+.cal-weekline { position: absolute; top: 0; bottom: 0; width: 1px; background: #dee2e6; z-index: 0; }
+.cal-monthline { position: absolute; top: 0; bottom: 0; width: 2px; background: #adb5bd; z-index: 0; }
+</style>
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/" class="text-success">Accueil</a></li>
+        <li class="breadcrumb-item"><a href="/legumes" class="text-success">Légumes</a></li>
+        <li class="breadcrumb-item"><a href="/legumes?famille_id={{ legume.famille.id }}" class="text-success">{{ legume.famille.nom }}</a></li>
+        <li class="breadcrumb-item active">{{ legume.nom }}</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h1 class="display-6 fw-bold mb-1">{{ legume.nom }}</h1>
+        <p class="text-muted fst-italic mb-2"><i class="bi bi-flower2 me-1"></i> {{ legume.nom_scientifique }}</p>
+        <p><span class="badge bg-success fs-6">{{ legume.famille.nom }}</span></p>
+    </div>
+    <a href="/legume/{{ legume.id }}/pdf" target="_blank" class="btn btn-outline-success btn-sm"><i class="bi bi-filetype-pdf me-1"></i>PDF</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="card border-0 shadow-sm h-100"><div class="card-body text-center py-3"><i class="bi bi-sun fs-4 text-warning"></i><h6 class="fw-bold mt-1 small">Exposition</h6><p class="text-muted small mb-0">{{ legume.exposition }}</p></div></div></div>
+    <div class="col-md-4"><div class="card border-0 shadow-sm h-100"><div class="card-body text-center py-3"><i class="bi bi-droplet fs-4 text-primary"></i><h6 class="fw-bold mt-1 small">Arrosage</h6><p class="text-muted small mb-0">{{ legume.arrosage }}</p></div></div></div>
+    <div class="col-md-4"><div class="card border-0 shadow-sm h-100"><div class="card-body text-center py-3"><i class="bi bi-tree fs-4 text-success"></i><h6 class="fw-bold mt-1 small">Sol</h6><p class="text-muted small mb-0">{{ legume.sol }}</p></div></div></div>
+</div>
+
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-header bg-transparent pt-3"><h5 class="mb-0"><i class="bi bi-info-circle text-success me-2"></i>Description</h5></div>
+    <div class="card-body"><p>{{ legume.description }}</p></div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-transparent pt-3"><h5 class="mb-0"><i class="bi bi-book text-success me-2"></i>Conseils de culture</h5></div>
+    <div class="card-body"><p>{{ legume.conseils_culture }}</p></div>
+</div>
+
+<ul class="nav nav-tabs mb-3" id="legumeTabs" role="tablist">
+    <li class="nav-item"><button class="nav-link active" id="varietes-tab" data-bs-toggle="tab" data-bs-target="#varietes" type="button" role="tab"><i class="bi bi-tree me-1"></i> Variétés ({{ varietes|length }})</button></li>
+    <li class="nav-item"><button class="nav-link" id="calendrier-tab" data-bs-toggle="tab" data-bs-target="#calendrier" type="button" role="tab"><i class="bi bi-calendar3 me-1"></i> Calendrier</button></li>
+    <li class="nav-item"><button class="nav-link" id="maladies-tab" data-bs-toggle="tab" data-bs-target="#maladies" type="button" role="tab"><i class="bi bi-bug me-1"></i> Maladies & Ravageurs ({{ maladies|length }})</button></li>
+</ul>
+
+<div class="tab-content" id="legumeTabsContent">
+    <div class="tab-pane fade show active" id="varietes" role="tabpanel">
+        <div class="row g-3">
+            {% for variete in varietes %}
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-success">{{ variete.nom }}</h5>
+                        <p class="card-text small">{{ variete.description }}</p>
+                        {% if variete.particularites %}
+                        <div class="bg-warning-subtle border-start border-warning border-3 rounded p-2 mt-2"><small><strong>Particularités :</strong> {{ variete.particularites }}</small></div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="calendrier" role="tabpanel">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent pb-1">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <span class="fw-semibold small">Légende :</span>
+                    {% for t in calendar_types %}
+                    <span class="small"><span class="d-inline-block rounded" style="width:12px;height:12px;background:{{ t.color }};vertical-align:middle"></span> {{ t.label }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="card-body p-3">
+                <div class="overflow-auto" style="min-height:100px">
+                    <div style="min-width:700px">
+                        <div class="d-flex mb-1" style="font-size:0.7rem;font-weight:600">
+                            <div style="width:120px;flex-shrink:0"></div>
+                            {% for m in range(1, 13) %}
+                            <div style="width:8.333%;text-align:center;border-left:2px solid #adb5bd">{{ MOIS_NOMS[m][:3] }}</div>
+                            {% endfor %}
+                        </div>
+                        {% for t in calendar_types %}
+                        <div class="d-flex align-items-center mb-1">
+                            <div class="small text-muted pe-2" style="width:120px;flex-shrink:0;font-size:0.7rem">{{ t.label }}</div>
+                            <div class="flex-grow-1 cal-track" style="position:relative;background:#f8f9fa;border-radius:3px">
+                                {% for w in range(48) %}
+                                <div class="cal-weekline" style="left:{{ w / 48 * 100 }}%"></div>
+                                {% endfor %}
+                                {% for m in range(13) %}
+                                <div class="cal-monthline" style="left:{{ m / 12 * 100 }}%"></div>
+                                {% endfor %}
+                                {% for e in t.entries %}
+                                <div class="cal-bar" style="background:{{ t.color }};{{ bar_style(e.mois_debut, e.semaine_debut, e.mois_fin, e.semaine_fin) }}" title="{{ e.details }}"></div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="card-body pt-0">
+                {% for c in calendrier %}
+                <div class="d-flex align-items-start mb-2 p-2 bg-light rounded small">
+                    <span class="badge me-2" style="background:{{ TYPE_COLORS.get(c.type, '#666') }};min-width:100px">{{ TYPE_LABELS.get(c.type, c.type) }}</span>
+                    <span class="flex-grow-1">{{ MOIS_NOMS[c.mois_debut] }} S{{ c.semaine_debut }} - {{ MOIS_NOMS[c.mois_fin] }} S{{ c.semaine_fin }} : {{ c.details }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="maladies" role="tabpanel">
+        <div class="row g-3">
+            {% for maladie in maladies %}
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start mb-2">
+                            <div class="flex-shrink-0 me-2">{% if maladie.type == 'ravageur' %}<i class="bi bi-bug fs-4 text-danger"></i>{% else %}<i class="bi bi-virus fs-4 text-warning"></i>{% endif %}</div>
+                            <div><h5 class="card-title mb-1 small">{{ maladie.nom }}</h5><span class="badge {% if maladie.type == 'ravageur' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ maladie.type }}</span></div>
+                        </div>
+                        <div class="mt-2"><h6 class="text-muted small fw-bold mb-1"><i class="bi bi-search me-1"></i>Symptômes</h6><p class="small mb-2">{{ maladie.symptomes }}</p></div>
+                        <div class="mt-2"><h6 class="text-muted small fw-bold mb-1"><i class="bi bi-gear me-1"></i>Traitement</h6><p class="small mb-2">{{ maladie.traitement }}</p></div>
+                        <div class="bg-info-subtle border-start border-info border-3 rounded p-2 mt-2"><small><strong><i class="bi bi-shield-check me-1"></i>Prévention :</strong> {{ maladie.prevention }}</small></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

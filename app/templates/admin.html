@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Administration - Mon Potager{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="mb-0"><i class="bi bi-gear-wide-connected text-success me-2"></i>Administration</h1>
+        <p class="text-muted mb-0">Gérez vos fiches légumes et la base de connaissances</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6 col-lg-4">
+        <a href="/admin/legumes" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center py-4">
+                    <div class="display-6 text-success mb-2"><i class="bi bi-egg-fried"></i></div>
+                    <h5>Légumes &amp; Variétés</h5>
+                    <p class="text-muted small mb-0">Ajouter, modifier ou supprimer des légumes, leurs variétés, le calendrier et les maladies</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <a href="/admin/familles" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center py-4">
+                    <div class="display-6 text-success mb-2"><i class="bi bi-diagram-3"></i></div>
+                    <h5>Familles botaniques</h5>
+                    <p class="text-muted small mb-0">Gérer les familles de plantes et leurs descriptions</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <a href="/admin/rag" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center py-4">
+                    <div class="display-6 text-success mb-2"><i class="bi bi-book"></i></div>
+                    <h5>Documents &amp; RAG</h5>
+                    <p class="text-muted small mb-0">Importer des PDFs de référence pour enrichir les réponses de l'assistant IA</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %}

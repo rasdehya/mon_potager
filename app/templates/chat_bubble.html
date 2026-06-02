@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="/static/chat.css">
+<div id="chat-bubble" class="chat-bubble" onclick="toggleChat()" title="Assistant potager">
+    <i class="bi bi-chat-dots-fill"></i>
+</div>
+
+<div id="chat-panel" class="chat-panel">
+    <div class="chat-header">
+        <span><i class="bi bi-flower2 me-1"></i> Assistant Potager</span>
+        <button class="btn btn-sm btn-link text-white p-0" onclick="toggleChat()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div id="chat-messages" class="chat-messages">
+        <div class="chat-msg ai">
+            <div class="msg-content">
+                <strong>🌱 Bonjour !</strong><br>
+                Je suis l'assistant du potager. Posez-moi des questions sur vos légumes, le calendrier, les maladies, les traitements naturels...
+            </div>
+        </div>
+    </div>
+    <div class="chat-status" id="chat-status" style="display:none">
+        <span class="spinner-border spinner-border-sm me-1"></span> L'assistant réfléchit...
+    </div>
+    <div class="chat-input-area">
+        <div class="input-group input-group-sm">
+            <input type="text" id="chat-input" class="form-control" placeholder="Posez votre question..." onkeydown="if(event.key==='Enter') sendChat()">
+            <button class="btn btn-success" onclick="sendChat()"><i class="bi bi-send-fill"></i></button>
+        </div>
+    </div>
+</div>
+
+<script src="/static/chat.js"></script>

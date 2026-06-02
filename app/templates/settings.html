@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Paramètres{% endblock %}
+{% block page_context %}page paramètres de l'application{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0"><i class="bi bi-gear text-success me-2"></i>Paramètres</h3>
+</div>
+
+<form method="post" action="/settings">
+<div class="row g-3">
+
+<div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent"><h5 class="mb-0 small"><i class="bi bi-robot text-success me-2"></i>Assistant IA</h5></div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">Modèle LLM</label>
+                <select class="form-select form-select-sm" name="llm_model">
+                    {% for m in models %}
+                    <option value="{{ m }}" {% if settings.llm.model == m %}selected{% endif %}>{{ m }}</option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">Redémarre le serveur opencode après changement.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent"><h5 class="mb-0 small"><i class="bi bi-book text-success me-2"></i>RAG — Base documentaire</h5></div>
+        <div class="card-body">
+            <div class="mb-2 form-check form-switch">
+                <input class="form-check-input" type="checkbox" name="rag_enabled" id="rag_enabled" {% if settings.rag.enabled %}checked{% endif %}>
+                <label class="form-check-label small" for="rag_enabled">Activer la recherche dans les PDFs</label>
+            </div>
+            <div class="mb-2">
+                <label class="form-label small fw-semibold">Nombre de documents à utiliser</label>
+                <input type="number" class="form-control form-control-sm" name="rag_k" value="{{ settings.rag.k }}" min="1" max="10" style="width:100px">
+                <div class="form-text">Entre 1 et 10. Plus de documents = plus de contexte mais plus de tokens.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-12">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent"><h5 class="mb-0 small"><i class="bi bi-palette text-success me-2"></i>Couleurs et libellés du calendrier</h5></div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm mb-0" style="font-size:0.8rem">
+                    <thead class="table-light"><tr><th>Clé</th><th>Libellé</th><th>Couleur</th></tr></thead>
+                    <tbody>
+                        {% for key in TYPE_LABELS %}
+                        <tr>
+                            <td><code>{{ key }}</code></td>
+                            <td><input type="text" class="form-control form-control-sm" name="label_{{ key }}" value="{{ TYPE_LABELS[key] }}"></td>
+                            <td><input type="color" class="form-control form-control-color form-control-sm" name="color_{{ key }}" value="{{ TYPE_COLORS[key] }}" style="width:60px;padding:2px"></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-12 text-end">
+    <button type="submit" class="btn btn-success"><i class="bi bi-check-lg me-1"></i>Enregistrer</button>
+</div>
+
+</div>
+</form>
+
+<hr class="my-3">
+<div class="text-center">
+    <form method="post" action="/settings/reset" onsubmit="return confirm('Réinitialiser tous les paramètres ?')">
+        <button class="btn btn-outline-danger btn-sm"><i class="bi bi-arrow-counterclockwise me-1"></i>Réinitialiser les paramètres</button>
+    </form>
+</div>
+{% endblock %}

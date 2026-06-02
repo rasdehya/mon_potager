@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ legume.nom }} - Fiche culture PDF</title>
+    <style>
+        @page { margin: 1.5cm; size: A4; }
+        body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 10pt; color: #222; line-height: 1.5; }
+        h1 { font-size: 20pt; color: #2d6a4f; margin-bottom: 0; }
+        h2 { font-size: 13pt; color: #2d6a4f; border-bottom: 2px solid #2d6a4f; padding-bottom: 3px; margin-top: 18px; }
+        .sci-name { font-style: italic; color: #666; font-size: 10pt; }
+        .badge { display: inline-block; background: #2d6a4f; color: #fff; padding: 1px 8px; border-radius: 3px; font-size: 8pt; }
+        table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 9pt; }
+        th, td { border: 1px solid #ccc; padding: 3px 5px; text-align: center; }
+        th { background: #2d6a4f; color: #fff; font-size: 8pt; }
+        .infos { display: flex; gap: 12px; margin: 8px 0; }
+        .infos > div { flex: 1; background: #f0f7f4; padding: 8px; border-radius: 4px; }
+        .infos strong { display: block; font-size: 8pt; color: #2d6a4f; }
+        .infos span { font-size: 9pt; }
+        .variete-item { margin: 4px 0; padding: 4px 6px; background: #f8f9fa; border-left: 3px solid #2d6a4f; page-break-inside: avoid; }
+        .maladie-item { margin: 4px 0; padding: 4px 6px; background: #f8f9fa; border-left: 3px solid #c62828; page-break-inside: avoid; }
+        .ravageur-item { border-left-color: #e65100; }
+        .bar-row { height: 18px; margin: 2px 0; }
+        .bar { display: inline-block; height: 14px; border-radius: 2px; vertical-align: middle; }
+        .footer { margin-top: 20px; font-size: 7pt; color: #999; text-align: center; border-top: 1px solid #ddd; padding-top: 6px; }
+        .cal-bar-cell { padding: 1px !important; height: 16px; }
+        .cal-dot { display: inline-block; width: 8px; height: 8px; border-radius: 1px; margin: 0; vertical-align: middle; }
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body>
+    <h1>{{ legume.nom }}</h1>
+    <div class="sci-name">{{ legume.nom_scientifique }}</div>
+    <div><span class="badge">{{ legume.famille.nom }}</span></div>
+
+    <div class="infos">
+        <div><strong>Exposition</strong><span>{{ legume.exposition }}</span></div>
+        <div><strong>Sol</strong><span>{{ legume.sol }}</span></div>
+        <div><strong>Arrosage</strong><span>{{ legume.arrosage }}</span></div>
+    </div>
+
+    <h2>Description</h2>
+    <p>{{ legume.description }}</p>
+
+    <h2>Conseils de culture</h2>
+    <p>{{ legume.conseils_culture }}</p>
+
+    <h2>Calendrier de culture</h2>
+    {% set months = ["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Aoû","Sep","Oct","Nov","Déc"] %}
+    <table>
+        <tr><th style="width:100px">Type</th>{% for m in months %}<th style="font-size:6pt">{{ m }}</th>{% endfor %}</tr>
+        {% for type_key, type_label in TYPE_LABELS.items() %}
+        {% set entries = [] %}
+        {% for c in calendrier %}{% if c.type == type_key %}{% set entries = entries + [c] %}{% endif %}{% endfor %}
+        {% if entries %}
+        <tr>
+            <td style="text-align:left;font-size:7pt;padding-left:4px">{{ type_label }}</td>
+            {% for m in range(1,13) %}
+            <td class="cal-bar-cell">
+                {% for c in entries %}
+                    {% if c.mois_debut <= m <= c.mois_fin %}
+                    <span class="cal-dot" style="background:#666"></span>
+                    {% endif %}
+                {% endfor %}
+            </td>
+            {% endfor %}
+        </tr>
+        {% endif %}
+        {% endfor %}
+    </table>
+
+    <table style="margin-top:4px">
+        <tr><th style="width:70px">Période</th><th>Type</th><th>Détails</th></tr>
+        {% for c in calendrier %}
+        <tr>
+            <td style="font-size:7pt">{{ months[c.mois_debut-1] }} S{{ c.semaine_debut }}-{{ months[c.mois_fin-1] }} S{{ c.semaine_fin }}</td>
+            <td style="font-size:7pt;text-align:left">{{ TYPE_LABELS.get(c.type, c.type) }}</td>
+            <td style="text-align:left;font-size:8pt">{{ c.details }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Variétés</h2>
+    {% for v in varietes %}
+    <div class="variete-item"><strong>{{ v.nom }}</strong><br><span style="font-size:9pt">{{ v.description }}</span>{% if v.particularites %}<br><span style="font-size:8pt;color:#666">{{ v.particularites }}</span>{% endif %}</div>
+    {% endfor %}
+
+    <h2>Maladies &amp; Ravageurs</h2>
+    {% for m in maladies %}
+    <div class="maladie-item {% if m.type == 'ravageur' %}ravageur-item{% endif %}">
+        <strong>{{ m.nom }}</strong> <span style="font-size:7pt;color:#666">({{ m.type }})</span><br>
+        <span style="font-size:8pt"><strong>Symptômes :</strong> {{ m.symptomes }}</span><br>
+        <span style="font-size:8pt"><strong>Traitement :</strong> {{ m.traitement }}</span><br>
+        <span style="font-size:8pt"><strong>Prévention :</strong> {{ m.prevention }}</span>
+    </div>
+    {% endfor %}
+
+    <div class="footer">Fiche générée par Mon Potager — {{ legume.nom }}</div>
+    <div class="no-print text-center" style="margin-top:15px">
+        <button onclick="window.print()" style="padding:8px 20px;background:#2d6a4f;color:#fff;border:none;border-radius:4px;cursor:pointer">Imprimer / PDF</button>
+    </div>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "llm": {
+    "model": "test/model",
+    "enabled": true
+  },
+  "rag": {
+    "enabled": true,
+    "k": 3
+  },
+  "colors": {
+    "semis_serre_chaude": "#e65100",
+    "semis_serre_froide": "#7cb342",
+    "semis_direct": "#1565c0",
+    "semis_interieur": "#7b1fa2",
+    "plantation": "#2e7d32",
+    "action": "#c62828",
+    "bouturage": "#ad1457",
+    "recolte": "#f9a825"
+  },
+  "labels": {
+    "semis_serre_chaude": "Semis serre chaude",
+    "semis_serre_froide": "Semis serre froide",
+    "semis_direct": "Semis direct",
+    "semis_interieur": "Semis int\u00e9rieur + repiquage",
+    "plantation": "Plantation",
+    "action": "Action \u00e0 mener",
+    "bouturage": "Bouturage",
+    "recolte": "R\u00e9colte"
+  }
+}

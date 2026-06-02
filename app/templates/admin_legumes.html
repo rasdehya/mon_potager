@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Admin - Légumes{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/admin" class="text-success">Admin</a></li>
+        <li class="breadcrumb-item active">Légumes</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0"><i class="bi bi-egg-fried text-success me-2"></i>Légumes</h3>
+    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addModal"><i class="bi bi-plus-lg"></i> Nouveau légume</button>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" style="font-size:0.85rem">
+                <thead class="table-light">
+                    <tr><th>Nom</th><th>Nom scientifique</th><th>Famille</th><th>Variétés</th><th style="width:140px">Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for l in legumes %}
+                    <tr>
+                        <td class="fw-semibold">{{ l.nom }}</td>
+                        <td><i>{{ l.nom_scientifique }}</i></td>
+                        <td><span class="badge bg-success-subtle text-success-emphasis">{{ l.famille.nom }}</span></td>
+                        <td>{{ l.varietes|length }}</td>
+                        <td>
+                            <a href="/admin/legumes/{{ l.id }}" class="btn btn-sm btn-outline-success py-0 px-1"><i class="bi bi-pencil"></i></a>
+                            <form method="post" action="/admin/legumes/{{ l.id }}/supprimer" class="d-inline" onsubmit="return confirm('Supprimer {{ l.nom }} et toutes ses données ?')">
+                                <button class="btn btn-sm btn-outline-danger py-0 px-1"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{# Add legume modal #}
+<div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog modal-lg"><div class="modal-content">
+        <form method="post" action="/admin/legumes/creer">
+            <div class="modal-header"><h5 class="modal-title"><i class="bi bi-plus-circle text-success me-2"></i>Nouveau légume</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Nom</label>
+                        <input type="text" class="form-control form-control-sm" name="nom" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Nom scientifique</label>
+                        <input type="text" class="form-control form-control-sm" name="nom_scientifique">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Famille</label>
+                        <select class="form-select form-select-sm" name="famille_id" required>
+                            {% for f in familles %}<option value="{{ f.id }}">{{ f.nom }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Exposition</label>
+                        <input type="text" class="form-control form-control-sm" name="exposition" placeholder="Plein soleil, mi-ombre...">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Sol</label>
+                        <input type="text" class="form-control form-control-sm" name="sol">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Arrosage</label>
+                        <input type="text" class="form-control form-control-sm" name="arrosage">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Description</label>
+                        <textarea class="form-control form-control-sm" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Conseils de culture</label>
+                        <textarea class="form-control form-control-sm" name="conseils_culture" rows="4"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer py-1">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-check-lg"></i> Créer</button>
+            </div>
+        </form>
+    </div></div>
+</div>
+{% endblock %}

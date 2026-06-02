@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{% if potager %}Modifier{% else %}Nouveau{% endif %} potager{% endblock %}
+{% block content %}
+<h1 class="mb-4">
+    <i class="bi bi-journal-text text-success me-2"></i>
+    {% if potager %}Modifier{% else %}Nouveau{% endif %} potager
+</h1>
+
+<form method="post" action="/potager/creer" class="row g-3">
+    <div class="col-md-6">
+        <label class="form-label fw-semibold">Nom du potager</label>
+        <input type="text" class="form-control" name="nom" required placeholder="ex: Potager 2026" value="{{ potager.nom if potager else '' }}">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label fw-semibold">Année</label>
+        <input type="number" class="form-control" name="annee" required value="{{ potager.annee if potager else '2026' }}" min="2020" max="2040">
+    </div>
+    <div class="col-12">
+        <label class="form-label fw-semibold">Notes</label>
+        <textarea class="form-control" name="notes" rows="2">{{ potager.notes if potager else '' }}</textarea>
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-success"><i class="bi bi-check-lg me-1"></i>Créer</button>
+        <a href="/potager" class="btn btn-outline-secondary ms-2">Annuler</a>
+    </div>
+</form>
+{% endblock %}

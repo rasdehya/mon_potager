@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Légumes du potager{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center mb-4">
+    <i class="bi bi-egg-fried fs-1 text-success me-3"></i>
+    <div>
+        <h1 class="mb-0">Légumes du potager</h1>
+        <p class="text-muted mb-0">
+            {% if current_famille %}
+                Famille : <strong>{{ current_famille.nom }}</strong>
+            {% else %}
+                Tous les légumes
+            {% endif %}
+            <span class="badge bg-success-subtle text-success-emphasis ms-2">{{ legumes|length }} légume{% if legumes|length > 1 %}s{% endif %}</span>
+        </p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <span class="fw-semibold text-muted me-2">Filtrer par famille :</span>
+                    <a href="/legumes" class="btn btn-sm {% if not current_famille %}btn-success{% else %}btn-outline-success{% endif %} rounded-pill">Toutes</a>
+                    {% for famille in familles %}
+                    <a href="/legumes?famille_id={{ famille.id }}" class="btn btn-sm {% if current_famille and current_famille.id == famille.id %}btn-success{% else %}btn-outline-success{% endif %} rounded-pill">{{ famille.nom }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for legume in legumes %}
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100 legume-card">
+            <div class="card-body text-center">
+                <div class="legume-icon mb-3">
+                    {% if legume.nom == 'Ail' %}
+                        <i class="bi bi-flower1 fs-1 text-warning"></i>
+                    {% elif legume.nom == 'Poivron' %}
+                        <i class="bi bi-basket fs-1 text-danger"></i>
+                    {% elif legume.nom == 'Potimarron' %}
+                        <i class="bi bi-circle fs-1 text-warning"></i>
+                    {% elif legume.nom == 'Épinard' %}
+                        <i class="bi bi-file-earmark fs-1 text-success"></i>
+                    {% else %}
+                        <i class="bi bi-flower2 fs-1 text-success"></i>
+                    {% endif %}
+                </div>
+                <h5 class="card-title">{{ legume.nom }}</h5>
+                <p class="card-text">
+                    <span class="badge bg-success-subtle text-success-emphasis">{{ legume.famille.nom }}</span>
+                    <span class="badge bg-info-subtle text-info-emphasis ms-1">{{ legume.varietes|length }} var.</span>
+                </p>
+                <p class="text-muted small">{{ legume.description[:100] }}{% if legume.description|length > 100 %}...{% endif %}</p>
+                <a href="/legume/{{ legume.id }}" class="btn btn-outline-success btn-sm stretched-link">
+                    Voir la fiche <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

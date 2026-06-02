@@ -1,0 +1,329 @@
+{% extends "base.html" %}
+{% block title %}{{ potager.nom }}{% endblock %}
+{% block content %}
+<style>
+.cal-track { position: relative; height: 28px; margin-bottom: 1px; background:#f8f9fa; border-radius: 3px; }
+.cal-bar { position: absolute; height: 12px; border-radius: 3px; cursor: help; opacity: 0.8; top: 1px; }
+.cal-bar:hover { opacity: 1; box-shadow: 0 0 4px rgba(0,0,0,0.3); z-index: 2; }
+.bar-2 { top: 14px; }
+.bar-3 { top: 1px; height: 24px; }
+.cal-weekline { position: absolute; top: 0; bottom: 0; width: 1px; background: #e9ecef; z-index: 0; }
+.cal-monthline { position: absolute; top: 0; bottom: 0; width: 2px; background: #adb5bd; z-index: 0; }
+.cal-header { font-size: 0.65rem; font-weight: 700; text-align: center; border-left: 2px solid #adb5bd; }
+</style>
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/potager" class="text-success">Mon Potager</a></li>
+        <li class="breadcrumb-item active">{{ potager.nom }}</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h2 class="mb-1"><i class="bi bi-journal-text text-success me-2"></i>{{ potager.nom }}</h2>
+        <p class="text-muted mb-0">{{ potager.annee }} · {{ items|length }} culture{% if items|length > 1 %}s{% endif %}</p>
+        {% if potager.notes %}<p class="text-muted small mb-0">{{ potager.notes }}</p>{% endif %}
+    </div>
+    <div>
+        <a href="/potager" class="btn btn-outline-secondary btn-sm me-2"><i class="bi bi-arrow-left"></i></a>
+        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addModal"><i class="bi bi-plus-lg"></i> Ajouter</button>
+    </div>
+</div>
+
+{% if items %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-transparent d-flex flex-wrap justify-content-between align-items-center gap-2 py-2">
+        <h5 class="mb-0 small"><i class="bi bi-calendar-range text-success me-2"></i>Calendrier annuel</h5>
+        <div class="d-flex flex-wrap gap-2 small">
+            {% for k, lbl in TYPE_LABELS.items() %}
+            <span><span class="d-inline-block rounded" style="width:10px;height:10px;background:{{ TYPE_COLORS[k] }};vertical-align:middle"></span> {{ lbl }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="card-body p-3">
+        <div class="overflow-auto" style="min-height:80px">
+            <div style="min-width:750px">
+                <div class="d-flex mb-1" style="font-size:0.65rem;font-weight:700">
+                    <div style="width:140px;flex-shrink:0"></div>
+                    {% for m in range(1, 13) %}
+                    <div class="cal-header" style="width:8.333%">
+                        {% if focus_mois == m %}<strong>{{ MOIS_NOMS[m][:3] }}</strong>{% else %}
+                        <a href="/potager/{{ potager.id }}?mois={{ m }}" class="text-decoration-none text-dark">{{ MOIS_NOMS[m][:3] }}</a>{% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% for item in items %}
+                {% set name = item.nom_custom or item.legume.nom %}
+                {% set variant = item.variete.nom if item.variete else '' %}
+                <div class="d-flex align-items-start mb-2">
+                    <div class="pe-2" style="width:140px;flex-shrink:0;font-size:0.7rem;line-height:1.2">
+                        <div class="fw-semibold text-truncate">{{ name }}</div>
+                        {% if variant %}<small class="text-muted d-block text-truncate">{{ variant }}</small>{% endif %}
+                        {% if item.type != 'legume' %}<span class="badge bg-info-subtle text-info-emphasis" style="font-size:0.55rem">{{ item.type[:8] }}</span>{% endif %}
+                    </div>
+                    <div class="flex-grow-1 cal-track" style="position:relative">
+                        {% for w in range(48) %}
+                        <div class="cal-weekline" style="left:{{ w / 48 * 100 }}%"></div>
+                        {% endfor %}
+                        {% for m in range(13) %}
+                        <div class="cal-monthline" style="left:{{ m / 12 * 100 }}%"></div>
+                        {% endfor %}
+                        {% set ns = namespace(count=0) %}
+                        {% for bar in item._bars %}
+                        {% set ns.count = ns.count + 1 %}
+                        <div class="cal-bar {% if ns.count > 2 %}bar-3{% elif ns.count > 1 %}bar-2{% endif %}" style="background:{{ bar.color }};{{ bar.style }}" title="{{ bar.label }} : {{ bar.cal.details }}"></div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if focus_mois %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-2">
+        <h5 class="mb-0 small"><i class="bi bi-calendar-month text-success me-2"></i>{{ MOIS_NOMS[focus_mois] }}</h5>
+        <div class="d-flex gap-1">
+            {% if focus_mois > 1 %}<a href="/potager/{{ potager.id }}?mois={{ focus_mois - 1 }}" class="btn btn-outline-success btn-sm py-0 px-1"><i class="bi bi-chevron-left"></i></a>{% endif %}
+            <span class="fw-semibold small mx-1">{{ MOIS_NOMS[focus_mois] }}</span>
+            {% if focus_mois < 12 %}<a href="/potager/{{ potager.id }}?mois={{ focus_mois + 1 }}" class="btn btn-outline-success btn-sm py-0 px-1"><i class="bi bi-chevron-right"></i></a>{% endif %}
+            <a href="/potager/{{ potager.id }}" class="btn btn-outline-secondary btn-sm py-0 px-1 ms-2"><i class="bi bi-grid"></i></a>
+        </div>
+    </div>
+    <div class="card-body">
+        {% set has_activity = namespace(val=false) %}
+        {% for item in items %}
+            {% set ns_cals = namespace(list=[]) %}
+            {% for bar in item._bars %}
+                {% set c = bar.cal %}
+                {% if c.mois_debut <= focus_mois <= c.mois_fin %}
+                    {% set ns_cals.list = ns_cals.list + [bar] %}
+                {% endif %}
+            {% endfor %}
+            {% if ns_cals.list %}
+                {% set has_activity.val = true %}
+                <div class="mb-2">
+                    <h6 class="fw-bold small mb-1 text-success">
+                        <i class="bi bi-dot"></i>{{ item.nom_custom or item.legume.nom }}
+                        {% if item.variete %}<small class="text-muted">({{ item.variete.nom }})</small>{% endif %}
+                        {% if item.emplacement %}<small class="text-muted ms-2">📍 {{ item.emplacement }}</small>{% endif %}
+                    </h6>
+                    {% for bar in ns_cals.list %}
+                    {% set c = bar.cal %}
+                    <div class="d-flex align-items-start mb-1 ms-3 p-1 bg-light rounded small">
+                        <span class="badge me-2" style="background:{{ bar.color }};min-width:80px;font-size:0.6rem">{{ bar.label }}</span>
+                        <span class="flex-grow-1">{{ c.details }}</span>
+                        <div class="btn-group btn-group-xs ms-1" style="flex-shrink:0">
+                            <button class="btn btn-sm btn-outline-secondary py-0 px-1" onclick="editCal({{ c.id }},'{{ c.type }}',{{ c.mois_debut }},{{ c.semaine_debut }},{{ c.mois_fin }},{{ c.semaine_fin }},'{{ c.details|replace("'","\\'")|replace('"',"&quot;") }}')" title="Modifier"><i class="bi bi-pencil"></i></button>
+                            <form method="post" action="/potager/calendrier/{{ c.id }}/supprimer" class="d-inline" onsubmit="return confirm('Supprimer ?')">
+                                <button class="btn btn-sm btn-outline-danger py-0 px-1"><i class="bi bi-x"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endfor %}
+        {% if not has_activity.val %}
+        <p class="text-muted text-center small my-3">Aucune activité en {{ MOIS_NOMS[focus_mois]|lower }}.</p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-transparent py-2"><h5 class="mb-0 small"><i class="bi bi-list-check text-success me-2"></i>Toutes mes cultures</h5></div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0" style="font-size:0.75rem">
+                <thead class="table-light">
+                    <tr><th>Culture</th><th>Variété</th><th>Type</th><th>Quantité</th><th>Emplacement</th><th>Compagnons</th><th style="width:50px"></th></tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td class="fw-semibold">{{ item.nom_custom or item.legume.nom }}</td>
+                        <td><small>{{ item.variete.nom if item.variete else '—' }}</small></td>
+                        <td><span class="badge bg-info-subtle text-info-emphasis" style="font-size:0.6rem">{{ item.type }}</span></td>
+                        <td><small>{{ item.quantite or '—' }}</small></td>
+                        <td><small>{{ item.emplacement or '—' }}</small></td>
+                        <td><small>{{ item.compagnons or '—' }}</small></td>
+                        <td><button class="btn btn-sm btn-outline-success py-0 px-1" onclick="addCal({{ item.id }},'{{ (item.nom_custom or item.legume.nom)|replace("'","\\'") }}')" title="Ajouter"><i class="bi bi-plus-circle"></i></button>
+                            <button class="btn btn-sm btn-outline-primary py-0 px-1" onclick="editItem({{ item.id }},'{{ (item.nom_custom or '')|replace("'","\\'") }}',{{ item.variete_id or 0 }},'{{ (item.quantite or '')|replace("'","\\'") }}','{{ (item.emplacement or '')|replace("'","\\'") }}','{{ (item.compagnons or '')|replace("'","\\'") }}','{{ (item.notes or '')|replace("'","\\'")|replace("\n"," ") }}',{{ item.legume_id or 0 }})" title="Modifier"><i class="bi bi-pencil"></i></button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="text-center py-5">
+    <i class="bi bi-plus-circle display-3 text-muted"></i>
+    <h4 class="mt-3 text-muted">Votre potager est vide</h4>
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal"><i class="bi bi-plus-lg"></i> Ajouter une culture</button>
+</div>
+{% endif %}
+
+{# Modal Ajouter #}
+<div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog modal-lg"><div class="modal-content">
+        <form method="post" action="/potager/{{ potager.id }}/ajouter">
+            <div class="modal-header"><h5 class="modal-title"><i class="bi bi-plus-circle text-success me-2"></i>Ajouter au potager</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="fw-semibold mb-2 small">Type</label>
+                    <div class="d-flex gap-3">
+                        {% for t,v in [('legume','Légume'),('couvert','Couvert végétal'),('amendement','Amendement/Paillis')] %}
+                        <div class="form-check"><input class="form-check-input" type="radio" name="type_item" value="{{ t }}" id="type_{{ t }}" onchange="toggleCustom(this.value)" {% if loop.first %}checked{% endif %}><label class="form-check-label small" for="type_{{ t }}">{{ v }}</label></div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div id="legumeFields">
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold">Légume</label>
+                        <select class="form-select form-select-sm" name="legume_id" id="legumeSelect" onchange="loadVarietes(this.value)">
+                            <option value="0">— Choisir —</option>
+                            {% for l in legumes %}
+                            <option value="{{ l.id }}">{{ l.nom }} ({{ l.famille.nom }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold">Variété</label>
+                        <select class="form-select form-select-sm" name="variete_id" id="varieteSelect"><option value="0">— Toutes —</option></select>
+                    </div>
+                </div>
+                <div id="customFields" style="display:none">
+                    <div class="mb-2"><label class="form-label small fw-semibold">Nom</label><input type="text" class="form-control form-control-sm" name="nom_custom" placeholder="Fumier, Moutarde..."></div>
+                </div>
+                <div class="row g-2">
+                    <div class="col-4"><label class="form-label small fw-semibold">Quantité</label><input type="text" class="form-control form-control-sm" name="quantite" placeholder="10 plants"></div>
+                    <div class="col-4"><label class="form-label small fw-semibold">Emplacement</label><input type="text" class="form-control form-control-sm" name="emplacement" placeholder="Planche A"></div>
+                    <div class="col-4"><label class="form-label small fw-semibold">Compagnons</label><input type="text" class="form-control form-control-sm" name="compagnons" placeholder="carotte, tomate"></div>
+                </div>
+                <div class="mt-2"><label class="form-label small fw-semibold">Notes</label><textarea class="form-control form-control-sm" name="notes" rows="1"></textarea></div>
+            </div>
+            <div class="modal-footer py-1">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-plus-lg"></i> Ajouter</button>
+            </div>
+        </form>
+    </div></div>
+</div>
+
+{# Modal Ajouter calendrier #}
+<div class="modal fade" id="addCalModal" tabindex="-1">
+    <div class="modal-dialog"><div class="modal-content">
+        <form method="post" action="" id="addCalForm">
+            <div class="modal-header"><h5 class="modal-title small"><i class="bi bi-plus-circle text-success me-2"></i>Ajouter calendrier <span id="addCalItemName" class="fw-bold"></span></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="mb-2"><label class="form-label small fw-semibold">Type</label>
+                    <select class="form-select form-select-sm" name="type_cal">{% for k,lbl in TYPE_LABELS.items() %}<option value="{{ k }}">{{ lbl }}</option>{% endfor %}</select></div>
+                <div class="row g-2 mb-2">
+                    <div class="col-3"><label class="form-label small fw-semibold">Mois début</label>
+                        <select class="form-select form-select-sm" name="mois_debut">{% for m in range(1,13) %}<option value="{{ m }}">{{ MOIS_NOMS[m][:3] }}</option>{% endfor %}</select></div>
+                    <div class="col-2"><label class="form-label small fw-semibold">Sem.</label>
+                        <select class="form-select form-select-sm" name="semaine_debut">{% for s in range(1,5) %}<option value="{{ s }}">{{ s }}</option>{% endfor %}</select></div>
+                    <div class="col-3"><label class="form-label small fw-semibold">Mois fin</label>
+                        <select class="form-select form-select-sm" name="mois_fin">{% for m in range(1,13) %}<option value="{{ m }}">{{ MOIS_NOMS[m][:3] }}</option>{% endfor %}</select></div>
+                    <div class="col-2"><label class="form-label small fw-semibold">Sem.</label>
+                        <select class="form-select form-select-sm" name="semaine_fin">{% for s in range(1,5) %}<option value="{{ s }}">{{ s }}</option>{% endfor %}</select></div>
+                </div>
+                <div class="mb-2"><label class="form-label small fw-semibold">Détails</label><textarea class="form-control form-control-sm" name="details" rows="2"></textarea></div>
+            </div>
+            <div class="modal-footer py-1">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-plus-lg"></i> Ajouter</button>
+            </div>
+        </form>
+    </div></div>
+</div>
+
+{# Modal Modifier culture #}
+<div class="modal fade" id="editItemModal" tabindex="-1">
+    <div class="modal-dialog"><div class="modal-content">
+        <form method="post" action="" id="editItemForm">
+            <div class="modal-header"><h5 class="modal-title small"><i class="bi bi-pencil text-success me-2"></i>Modifier la culture</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="row g-2">
+                    <div class="col-6"><label class="form-label small fw-semibold">Nom</label><input type="text" class="form-control form-control-sm" name="nom_custom" id="editItemName"></div>
+                    <div class="col-6"><label class="form-label small fw-semibold">Variété</label>
+                        <select class="form-select form-select-sm" name="variete_id" id="editItemVariete"><option value="0">— Aucune —</option></select></div>
+                </div>
+                <div class="row g-2 mt-1">
+                    <div class="col-4"><label class="form-label small fw-semibold">Quantité</label><input type="text" class="form-control form-control-sm" name="quantite" id="editItemQuantite"></div>
+                    <div class="col-4"><label class="form-label small fw-semibold">Emplacement</label><input type="text" class="form-control form-control-sm" name="emplacement" id="editItemEmplacement"></div>
+                    <div class="col-4"><label class="form-label small fw-semibold">Compagnons</label><input type="text" class="form-control form-control-sm" name="compagnons" id="editItemCompagnons"></div>
+                </div>
+                <div class="mt-2"><label class="form-label small fw-semibold">Notes</label><textarea class="form-control form-control-sm" name="notes" id="editItemNotes" rows="2"></textarea></div>
+            </div>
+            <div class="modal-footer py-1">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-check-lg"></i> Enregistrer</button>
+            </div>
+        </form>
+    </div></div>
+</div>
+
+{# Modal Modifier calendrier #}
+<div class="modal fade" id="editCalModal" tabindex="-1">
+    <div class="modal-dialog"><div class="modal-content">
+        <form method="post" action="" id="editCalForm">
+            <div class="modal-header"><h5 class="modal-title small"><i class="bi bi-pencil text-success me-2"></i>Modifier calendrier</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="mb-2"><label class="form-label small fw-semibold">Type</label><input type="text" class="form-control form-control-sm" id="editCalType" readonly disabled></div>
+                <div class="row g-2 mb-2">
+                    <div class="col-3"><label class="form-label small fw-semibold">Mois début</label>
+                        <select class="form-select form-select-sm" name="mois_debut" id="editMoisDebut">{% for m in range(1,13) %}<option value="{{ m }}">{{ MOIS_NOMS[m][:3] }}</option>{% endfor %}</select></div>
+                    <div class="col-2"><label class="form-label small fw-semibold">Sem.</label>
+                        <select class="form-select form-select-sm" name="semaine_debut" id="editSemDebut">{% for s in range(1,5) %}<option value="{{ s }}">{{ s }}</option>{% endfor %}</select></div>
+                    <div class="col-3"><label class="form-label small fw-semibold">Mois fin</label>
+                        <select class="form-select form-select-sm" name="mois_fin" id="editMoisFin">{% for m in range(1,13) %}<option value="{{ m }}">{{ MOIS_NOMS[m][:3] }}</option>{% endfor %}</select></div>
+                    <div class="col-2"><label class="form-label small fw-semibold">Sem.</label>
+                        <select class="form-select form-select-sm" name="semaine_fin" id="editSemFin">{% for s in range(1,5) %}<option value="{{ s }}">{{ s }}</option>{% endfor %}</select></div>
+                </div>
+                <div class="mb-2"><label class="form-label small fw-semibold">Détails</label><textarea class="form-control form-control-sm" name="details" id="editDetails" rows="2"></textarea></div>
+            </div>
+            <div class="modal-footer py-1">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-check-lg"></i> Enregistrer</button>
+            </div>
+        </form>
+    </div></div>
+</div>
+
+<script>
+function toggleCustom(v) { document.getElementById('legumeFields').style.display=v==='legume'?'':'none'; document.getElementById('customFields').style.display=v==='legume'?'none':''; }
+function loadVarietes(id) {
+    const s=document.getElementById('varieteSelect'); s.innerHTML='<option value="0">— Toutes —</option>';
+    if(id>0) fetch('/api/legume/'+id+'/varietes').then(r=>r.json()).then(d=>d.forEach(v=>{const o=document.createElement('option');o.value=v.id;o.textContent=v.nom;s.appendChild(o)}));
+}
+function addCal(id,n) { document.getElementById('addCalItemName').textContent='— '+n; document.getElementById('addCalForm').action='/potager/item/'+id+'/calendrier/ajouter'; new bootstrap.Modal(document.getElementById('addCalModal')).show(); }
+function editItem(id,n,vid,q,e,c,notes,lid) {
+    document.getElementById('editItemName').value=n;
+    document.getElementById('editItemQuantite').value=q;
+    document.getElementById('editItemEmplacement').value=e;
+    document.getElementById('editItemCompagnons').value=c;
+    document.getElementById('editItemNotes').value=notes;
+    const vs=document.getElementById('editItemVariete');
+    if(lid>0) fetch('/api/legume/'+lid+'/varietes').then(r=>r.json()).then(d=>{vs.innerHTML='<option value="0">— Aucune —</option>';d.forEach(v=>{const o=document.createElement('option');o.value=v.id;o.textContent=v.nom;if(v.id==vid)o.selected=true;vs.appendChild(o)});});
+    else vs.innerHTML='<option value="0">— Aucune —</option>';
+    document.getElementById('editItemForm').action='/potager/item/'+id+'/editer';
+    new bootstrap.Modal(document.getElementById('editItemModal')).show();
+}
+function editCal(id,type,md,sm,mf,sf,d) {
+    document.getElementById('editCalType').value=type;
+    document.getElementById('editMoisDebut').value=md; document.getElementById('editSemDebut').value=sm;
+    document.getElementById('editMoisFin').value=mf; document.getElementById('editSemFin').value=sf;
+    document.getElementById('editDetails').value=d;
+    document.getElementById('editCalForm').action='/potager/calendrier/'+id+'/editer';
+    new bootstrap.Modal(document.getElementById('editCalModal')).show();
+}
+</script>
+{% endblock %}

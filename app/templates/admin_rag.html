@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Admin - Documents RAG{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/admin" class="text-success">Admin</a></li>
+        <li class="breadcrumb-item active">Documents</li>
+    </ol>
+</nav>
+
+<h3 class="mb-3"><i class="bi bi-book text-success me-2"></i>Base documentaire (RAG)</h3>
+<p class="text-muted small">Importe des PDFs de référence (livres, fiches techniques) pour que l'assistant IA puisse répondre à partir de ces sources.</p>
+
+{% if not rag_ok %}
+<div class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    ChromaDB ou sentence-transformers non installés. Lance <code>uv pip install chromadb sentence-transformers pypdf</code>
+</div>
+{% endif %}
+
+<div class="row g-4">
+    <div class="col-md-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent"><h6 class="mb-0"><i class="bi bi-upload text-success me-2"></i>Importer un PDF</h6></div>
+            <div class="card-body">
+                <form method="post" action="/admin/rag/upload" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Fichier PDF</label>
+                        <input type="file" class="form-control form-control-sm" name="file" accept=".pdf" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Titre (optionnel)</label>
+                        <input type="text" class="form-control form-control-sm" name="title" placeholder="ex: Guide du potager bio">
+                    </div>
+                    <button type="submit" class="btn btn-success btn-sm" {% if not rag_ok %}disabled{% endif %}><i class="bi bi-upload me-1"></i>Importer et indexer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent"><h6 class="mb-0"><i class="bi bi-files text-success me-2"></i>Documents indexés</h6></div>
+            <div class="card-body p-0">
+                {% if docs %}
+                <table class="table table-sm mb-0" style="font-size:0.8rem">
+                    <thead class="table-light"><tr><th>Titre</th><th>Identifiant</th><th>Chunks</th><th style="width:60px"></th></tr></thead>
+                    <tbody>
+                        {% for d in docs %}
+                        <tr>
+                            <td>{{ d.title }}</td>
+                            <td><code>{{ d.id }}</code></td>
+                            <td>{{ d.chunks }}</td>
+                            <td>
+                                <a href="/admin/rag/{{ d.id }}/supprimer" class="btn btn-sm btn-outline-danger py-0 px-1" onclick="return confirm('Supprimer ?')"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-4 text-muted small">
+                    <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                    Aucun document importé
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

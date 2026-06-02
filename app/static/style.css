@@ -1,0 +1,23 @@
+:root { --bs-success: #2d6a4f; --bs-success-rgb: 45, 106, 79; }
+
+body { background-color: #f8faf9; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+.navbar { background: linear-gradient(135deg, #2d6a4f, #40916c) !important; }
+.card { border-radius: 12px; transition: transform .2s ease, box-shadow .2s ease; }
+.card:hover { transform: translateY(-2px); }
+.card.border-success { border-color: #2d6a4f !important; }
+.btn-success { background-color: #2d6a4f; border-color: #2d6a4f; }
+.btn-outline-success { color: #2d6a4f; border-color: #2d6a4f; }
+.btn-outline-success:hover { background-color: #2d6a4f; border-color: #2d6a4f; }
+.nav-tabs .nav-link { border: none; color: #6c757d; font-weight: 500; padding: .6rem 1rem; border-radius: 8px 8px 0 0; }
+.nav-tabs .nav-link:hover { color: #2d6a4f; background-color: #d8f3dc; }
+.nav-tabs .nav-link.active { color: #2d6a4f; background-color: #fff; border-bottom: 3px solid #2d6a4f; }
+.breadcrumb a:hover { text-decoration: underline !important; }
+.rounded-4 { border-radius: 16px !important; }
+.bg-success-subtle { background-color: #d8f3dc !important; }
+.bg-info-subtle { background-color: #e0fbfc !important; }
+.bg-warning-subtle { background-color: #fff8e1 !important; }
+
+@media (max-width: 768px) {
+    .display-5 { font-size: 1.8rem; }
+    .display-6 { font-size: 1.4rem; }
+}
